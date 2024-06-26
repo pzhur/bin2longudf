@@ -3,7 +3,8 @@ import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
 import scala.collection.mutable
 import org.apache.spark.sql.expressions.Aggregator
-import org.apache.spark.sql.{Encoder, Encoders}
+import org.apache.spark.sql.{Encoder, Encoders, SparkSession, functions}
+
 
 
 object sumMapsAsArray extends Aggregator[Array[Int], Array[Int], Array[Int]] {
@@ -49,6 +50,10 @@ object sumMapsAsArray extends Aggregator[Array[Int], Array[Int], Array[Int]] {
 
     // Convert mutable map to array and return
     result.toArray.flatMap { case (key, value) => Array(key, value) }
-
   }
+
+  def register(spark: SparkSession): Unit = {
+    spark.udf.register("sumMapsAsArray", functions.udaf(sumMapsAsArray))
+  }
+
 }
