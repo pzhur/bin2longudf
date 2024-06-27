@@ -11,17 +11,14 @@ object sumMapsAsArray extends Aggregator[Array[Int], Array[Int], Array[Int]] {
   override def zero: Array[Int] = Array[Int]()
 
   override def reduce(buffer: Array[Int], newValue: Array[Int]): Array[Int] = {
-    //println(s"Reduce called: buffer: ${buffer.mkString("Array(", ", ", ")")} - newValue: ${newValue.mkString("Array(", ", ", ")")}")
     this.sumMapsAsArrayElem(buffer, newValue)
   }
 
   override def merge(intermediateValue1: Array[Int], intermediateValue2: Array[Int]): Array[Int] = {
-    //println(s"Merge called: ival1: ${intermediateValue1.mkString("Array(", ", ", ")")} - ival2: ${intermediateValue2.mkString("Array(", ", ", ")")}")
     this.sumMapsAsArrayElem(intermediateValue1, intermediateValue2)
   }
 
   override def finish(reduction: Array[Int]): Array[Int] = {
-    //println(s"Finish called: ${reduction.mkString("Array(", ", ", ")")}")
     reduction
   }
 
@@ -52,8 +49,8 @@ object sumMapsAsArray extends Aggregator[Array[Int], Array[Int], Array[Int]] {
     result.toArray.flatMap { case (key, value) => Array(key, value) }
   }
 
-  def register(spark: SparkSession): Unit = {
-    spark.udf.register("sumMapsAsArray", functions.udaf(sumMapsAsArray))
+  def register(spark: SparkSession, name: String = "sumMapsAsArray"): Unit = {
+    spark.udf.register(name, functions.udaf(sumMapsAsArray))
   }
 
 }
