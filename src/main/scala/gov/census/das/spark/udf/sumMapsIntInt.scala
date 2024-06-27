@@ -10,11 +10,11 @@ object sumMapsIntInt extends Aggregator[Map[Int, Int], Map[Int, Int], Map[Int, I
   override def zero: Map[Int, Int] = Map[Int, Int]()
 
   override def reduce(buffer: Map[Int, Int], newValue: Map[Int, Int]): Map[Int, Int] = {
-    this.sumMapsIntLongElem(buffer, newValue)
+    this.sumMapsIntIntElem(buffer, newValue)
   }
 
   override def merge(intermediateValue1: Map[Int, Int], intermediateValue2: Map[Int, Int]): Map[Int, Int] = {
-    this.sumMapsIntLongElem(intermediateValue1, intermediateValue2)
+    this.sumMapsIntIntElem(intermediateValue1, intermediateValue2)
   }
 
   override def finish(reduction: Map[Int, Int]): Map[Int, Int] = {
@@ -25,7 +25,7 @@ object sumMapsIntInt extends Aggregator[Map[Int, Int], Map[Int, Int], Map[Int, I
 
   override def outputEncoder: Encoder[Map[Int, Int]] = ExpressionEncoder()
 
-  def sumMapsIntLongElem(map1: Map[Int, Int], map2: Map[Int, Int]): Map[Int, Int] = {
+  def sumMapsIntIntElem(map1: Map[Int, Int], map2: Map[Int, Int]): Map[Int, Int] = {
     val result = mutable.Map[Int, Int]()
 
     // Add all entries from map1 (first converting Array to pairs to map) to result
