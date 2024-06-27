@@ -79,8 +79,8 @@ def testSumMapIntLong(spark, sc, dasudfmodule):
 
 
 def testSumMapLongLong(spark, sc, dasudfmodule):
-    udaf_name = "testSumMapLongLong"
-    java_udf = dasudfmodule.testSumMapLongLong.register(spark._jsparkSession, udaf_name)
+    udaf_name = "sumMapsLongLong"
+    java_udf = dasudfmodule.sumMapsLongLong.register(spark._jsparkSession, udaf_name)
     f = makeDict
     args = (np.int64, np.int64)
     schema = T.MapType(T.LongType(), T.LongType())
@@ -103,5 +103,7 @@ if __name__ == "__main__":
     sc = spark.sparkContext
     dasudfmodule = sc._jvm.gov.census.das.spark.udf
     testSumMapAsArray(spark, sc, dasudfmodule)
+    testSumMapAsArrayLong(spark, sc, dasudfmodule)
     testSumMapIntLong(spark, sc, dasudfmodule)
     testSumMapIntInt(spark, sc, dasudfmodule)
+    testSumMapLongLong(spark, sc, dasudfmodule)

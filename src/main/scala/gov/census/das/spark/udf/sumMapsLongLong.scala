@@ -1,5 +1,4 @@
 package gov.census.das.spark.udf
-
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
 import scala.collection.mutable
