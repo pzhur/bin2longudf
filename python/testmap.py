@@ -29,6 +29,7 @@ def makeCOOs(args, f):
 def passThruDF(args, f, sc, schema, udaf_name):
     cool, coosum, size = makeCOOs(args, f)
     df = sc.parallelize(cool).toDF(schema=schema)
+    java_udf = getattr(dasudfmodule, udaf_name).register(spark._jsparkSession, udaf_name)
     csumrec = df.selectExpr(f"{udaf_name}(value) as value").rdd.collect()[0]['value']
     return coosum, csumrec, size
 
@@ -50,7 +51,6 @@ def recoverAndAsser(coosum, csumrec, size, datatype):
 
 def testSumMapAsArray(spark, sc, dasudfmodule):
     udaf_name = "sumMapsAsArray"
-    java_udf = dasudfmodule.sumMapsAsArray.register(spark._jsparkSession, udaf_name)
     f = makeInterleavedArray
     args = (np.int32,)
     schema = T.ArrayType(T.IntegerType())
@@ -60,7 +60,6 @@ def testSumMapAsArray(spark, sc, dasudfmodule):
 
 def testSumMapAsArrayLong(spark, sc, dasudfmodule):
     udaf_name = "sumMapsAsArrayLong"
-    java_udf = dasudfmodule.sumMapsAsArrayLong.register(spark._jsparkSession, udaf_name)
     f = makeInterleavedArray
     args = (np.int64,)
     schema = T.ArrayType(T.LongType())
@@ -70,7 +69,6 @@ def testSumMapAsArrayLong(spark, sc, dasudfmodule):
 
 def testSumMapIntLong(spark, sc, dasudfmodule):
     udaf_name = "sumMapsIntLong"
-    java_udf = dasudfmodule.sumMapsIntLong.register(spark._jsparkSession, udaf_name)
     f = makeDict
     args = (np.int32, np.int64)
     schema = T.MapType(T.IntegerType(), T.LongType())
@@ -80,7 +78,6 @@ def testSumMapIntLong(spark, sc, dasudfmodule):
 
 def testSumMapLongLong(spark, sc, dasudfmodule):
     udaf_name = "sumMapsLongLong"
-    java_udf = dasudfmodule.sumMapsLongLong.register(spark._jsparkSession, udaf_name)
     f = makeDict
     args = (np.int64, np.int64)
     schema = T.MapType(T.LongType(), T.LongType())
@@ -90,12 +87,19 @@ def testSumMapLongLong(spark, sc, dasudfmodule):
 
 def testSumMapIntInt(spark, sc, dasudfmodule):
     udaf_name = "sumMapsIntInt"
-    java_udf = dasudfmodule.sumMapsIntInt.register(spark._jsparkSession, "sumMapsIntInt")
     f = makeDict
     args = (np.int32, np.int32)
     schema = T.MapType(T.IntegerType(), T.IntegerType())
     coosum, csumrec, size = passThruDF(args, f, sc, schema, udaf_name)
     recoverAndAsser(coosum, csumrec, size, "map")
+
+
+def testSumArraysLong(spark, sc, dasudfmodule):
+    udaf_name = "sumArraysLong"
+    java_udf = getattr(dasudfmodule, udaf_name).register(spark._jsparkSession, udaf_name)
+    arrs = tuple(np.random.randint(10, size=100) for _ in range(10))
+    df = sc.parallelize(map(lambda a: a.astype(np.int64).tolist(), arrs)).toDF(schema=T.ArrayType(T.LongType()))
+    assert np.all(np.array(df.selectExpr(f"sumArraysLong(value) as value").rdd.collect()[0]['value']) == sum(arrs))
 
 
 if __name__ == "__main__":
