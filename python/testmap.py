@@ -102,6 +102,14 @@ def testSumArraysLong(spark, sc, dasudfmodule):
     assert np.all(np.array(df.selectExpr(f"sumArraysLong(value) as value").rdd.collect()[0]['value']) == sum(arrs))
 
 
+def testSumArraysDouble(spark, sc, dasudfmodule):
+    udaf_name = "sumArraysDouble"
+    java_udf = getattr(dasudfmodule, udaf_name).register(spark._jsparkSession, udaf_name)
+    arrs = tuple(np.random.normal(10, size=100) for _ in range(10))
+    df = sc.parallelize(map(lambda a: a.astype(np.float64).tolist(), arrs)).toDF(schema=T.ArrayType(T.DoubleType()))
+    assert np.all(np.array(df.selectExpr(f"sumArraysDouble(value) as value").rdd.collect()[0]['value']) == sum(arrs))
+
+
 if __name__ == "__main__":
     spark = SparkSession.builder.getOrCreate()
     sc = spark.sparkContext
@@ -111,3 +119,5 @@ if __name__ == "__main__":
     testSumMapIntLong(spark, sc, dasudfmodule)
     testSumMapIntInt(spark, sc, dasudfmodule)
     testSumMapLongLong(spark, sc, dasudfmodule)
+    testSumArraysLong(spark, sc, dasudfmodule)
+    testSumArraysDouble(spark, sc, dasudfmodule)
