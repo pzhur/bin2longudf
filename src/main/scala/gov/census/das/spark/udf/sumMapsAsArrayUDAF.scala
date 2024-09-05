@@ -1,3 +1,7 @@
+// This is unsuccessful attempt. For newer versions of Spark one has to extend
+// the Aggregator class, not UserDefinedAggregatorFunction
+
+
 //package gov.census.das.spark.udf
 //import scala.collection.mutable.ArrayBuffer
 //import org.apache.spark.sql.expressions.{UserDefinedAggregateFunction, MutableAggregationBuffer}

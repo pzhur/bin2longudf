@@ -1,3 +1,11 @@
+// Implements Spark UDAF (user defined aggregator function) that can be complied to JAR and called
+// from pyspark for summing a column of sparse matrices (in COO format) converted to interleaved arrays of Ints
+// as [ind0, val0, ind1, val1...].
+// The use case was calling from pyspark to sum scipy.sparse.coo matrices, but it didn't show performance increase
+// vs summing within python in RDD.
+// A better way to use spark functions collect_list followed by flatten, and then convert back to COO at the end,
+// summing the duplicate elements
+
 package gov.census.das.spark.udf
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 

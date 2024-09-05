@@ -1,3 +1,12 @@
+// Implements Spark UDAF (user defined aggregator function) that can be complied to JAR and called
+// from pyspark for summing a column of sparse matrices (in COO format) converted to python dicts {int: long}
+// and then spark MapType(IntType(), LongType()) (see unit tests in python folder).
+// The use case was calling from pyspark to sum scipy.sparse.coo matrices, but it didn't show performance increase
+// vs summing within python in RDD.
+// A better way to use spark functions collect_list followed by flatten, and then convert back to COO at the end,
+// summing the duplicate elements
+// This function can be used though if a column of MapType(IntType(), LongType()) needs to be summed in some other context
+
 package gov.census.das.spark.udf
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
