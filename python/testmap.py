@@ -1,5 +1,5 @@
 """
-Unit tests run in pyspark for scala functions (UDAF) aggregating sparse and dense arrays.
+Unit tests run in pyspark for scala functions (UDAF - User Defined Aggregator Functions) aggregating sparse and dense arrays.
 Sparse array are represented as kv-maps and summed as such or converted to interleaved arrays
 Dense arrays are just summed directly
 """
