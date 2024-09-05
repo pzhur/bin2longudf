@@ -1,21 +1,32 @@
+"""
+Unit tests run in pyspark for scala functions (UDAF) aggregating sparse and dense arrays.
+Sparse array are represented as kv-maps and summed as such or converted to interleaved arrays
+Dense arrays are just summed directly
+"""
 import numpy as np
 import scipy.sparse as ss
 import pyspark.sql.types as T
 from pyspark.sql import SparkSession
 
 
-def makeInterleavedArray(c, valuetype):
+def makeInterleavedArray(c: ss.coo_matrix, valuetype):
+    """Converts sparse COO matrix to interleaved array [ind0, val0, ind1, val1, ...]"""
     intl = np.empty((2 * len(c.col),), dtype=int)
     intl[0::2] = c.col
     intl[1::2] = c.data
     return intl.astype(valuetype).tolist()
 
 
-def makeDict(c, keytype, valuetype):
+def makeDict(c: ss.coo_matrix, keytype, valuetype):
+    """Makes dict from COO matrix"""
     return dict(zip(c.col.astype(keytype).tolist(), c.data.astype(valuetype).tolist()))
 
 
 def makeCOOs(args, f):
+    """
+    Makes a list of random-valued COO-matrices passing each through function f after creation.
+    Also calculates a sum of all the matrices in the list (for comparison later)
+    """
     size = 10
     cool = []
     coosum = 0
@@ -27,6 +38,11 @@ def makeCOOs(args, f):
 
 
 def passThruDF(args, f, sc, schema, udaf_name):
+    """
+    Makes and converts list of COO-matrices representations (dicts or interleaved arrays)
+    to Spark DataFrame and applied the aggregating function (UDAF) which is being tested.
+    Then collects the result from spark and returns it.
+    """
     cool, coosum, size = makeCOOs(args, f)
     df = sc.parallelize(cool).toDF(schema=schema)
     java_udf = getattr(dasudfmodule, udaf_name).register(spark._jsparkSession, udaf_name)
@@ -35,6 +51,10 @@ def passThruDF(args, f, sc, schema, udaf_name):
 
 
 def recoverAndAsser(coosum, csumrec, size, datatype):
+    """
+    Converts representation of the aggregated (summed) matrix back to COO matrix, and compares with
+    the sum calculated outside of spark
+    """
     if datatype == "array":
         data = np.array(csumrec)[1::2]
         i = np.zeros(len(csumrec) // 2, dtype=int)
@@ -48,6 +68,10 @@ def recoverAndAsser(coosum, csumrec, size, datatype):
     coosumrec = ss.coo_matrix((data, (i, j)), shape=(1, size))
     assert not np.all((coosumrec != coosum).toarray())
 
+
+# The following are actual test functions. Call the the function that makes COO-matrices, converts and
+# passes through Spark with the aggregating function (UDAF) being tested. Then call the function checking
+# the result againse the sum calculated outside of spark
 
 def testSumMapAsArray(spark, sc, dasudfmodule):
     udaf_name = "sumMapsAsArray"
