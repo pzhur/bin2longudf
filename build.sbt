@@ -11,6 +11,7 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "org.apache.spark" % "spark-sql_2.12" % "3.5.0" % Provided,
       "org.apache.spark" % "spark-core_2.12" % "3.5.1",
+      "org.apache.spark" % "spark-mllib_2.12" % "3.5.1",
       //"org.apache.maven.plugins" % "maven-assembly-plugin" % "3.7.0",
     )
   )
