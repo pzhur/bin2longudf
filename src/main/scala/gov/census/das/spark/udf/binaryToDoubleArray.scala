@@ -7,18 +7,12 @@
 package gov.census.das.spark.udf
 import org.apache.spark.sql.api.java.UDF1
 
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import java.nio.DoubleBuffer
 
 class binaryToDoubleArray extends UDF1[Array[Byte], Array[Double]]{
-  override def call(binaryArray: Array[Byte]): Array[Double] = {
-    if (binaryArray == null) {
-      return null
-    }
-    val bb: ByteBuffer = ByteBuffer.wrap(binaryArray)
-    bb.order(ByteOrder.nativeOrder)
-    val doubles = new Array[Double](binaryArray.length / 8)
-    val doublearr = bb.asDoubleBuffer().get(doubles)
-    doubles
+  override def call(bytes: Array[Byte]): Array[Double] = {
+    if (bytes == null) { return null }
+    val fb = new fillBuffer
+    DoubleBuffer.allocate(bytes.length / 8).put(fb.call(bytes).asDoubleBuffer).array()
   }
 }

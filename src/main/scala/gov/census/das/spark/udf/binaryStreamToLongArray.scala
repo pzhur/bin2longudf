@@ -5,8 +5,13 @@
 // UDFs expecting arrays, or standard spark SQL functions, or save to parquet taking less space.
 
 package gov.census.das.spark.udf
+import org.apache.spark.sql.api.java.UDF1
+import java.nio.LongBuffer
 
-class binaryStreamToLongArray extends byte2Array[Long] {
-  override def convertBuffer(binaryArray: Array[Byte]): Array[Long] =
-    java.nio.LongBuffer.allocate(binaryArray.length / 8).put(fillBuffer(binaryArray).asLongBuffer).array()
+class binaryStreamToLongArray extends UDF1[Array[Byte], Array[Long]] {
+  override def call(bytes: Array[Byte]): Array[Long] = {
+    if (bytes == null) {return null}
+    val fb = new fillBuffer
+    LongBuffer.allocate(bytes.length / 8).put(fb.call(bytes).asLongBuffer).array()
+  }
 }

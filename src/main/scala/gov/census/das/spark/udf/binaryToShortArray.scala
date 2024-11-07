@@ -5,13 +5,15 @@
 // UDFs expecting arrays, or standard spark SQL functions, or save to parquet taking less space.
 
 package gov.census.das.spark.udf
-import org.apache.spark.sql.api.java.UDF1
-import java.nio.IntBuffer
 
-class binaryToIntArray extends UDF1[Array[Byte], Array[Int]] {
-  override def call(bytes: Array[Byte]): Array[Int] = {
+import org.apache.spark.sql.api.java.UDF1
+
+import java.nio.ShortBuffer
+
+class binaryToShortArray extends UDF1[Array[Byte], Array[Int]] {
+  override def call(bytes: Array[Byte]): Array[Short] = {
     if (bytes == null) {return null}
     val fb = new fillBuffer
-    IntBuffer.allocate(bytes.length / 4).put(fb.call(bytes).asIntBuffer).array()
+    ShortBuffer.allocate(bytes.length / 2).put(fb.call(bytes).asShortBuffer).array()
   }
 }

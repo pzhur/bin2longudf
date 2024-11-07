@@ -15,14 +15,14 @@ class Byte2ArrayTest extends AnyFunSuite {
     val a = Seq.fill(n)(Random.nextLong).toArray
     val a4sp = allocateBuffer(a.length * 8)
     a4sp.asLongBuffer().put(java.nio.LongBuffer.wrap(a))
-    assert(bs2long.convertBuffer(a4sp.array()) === a)
+    assert(bs2long.call(a4sp.array()) === a)
   }
 
   test("Byte2IntTest") {
     val a = Seq.fill(n)(Random.nextInt).toArray
     val a4sp = allocateBuffer(a.length * 4)
     a4sp.asIntBuffer().put(java.nio.IntBuffer.wrap(a))
-    assert(bs2int.convertBuffer(a4sp.array()) === a)
+    assert(bs2int.call(a4sp.array()) === a)
   }
 
 }
