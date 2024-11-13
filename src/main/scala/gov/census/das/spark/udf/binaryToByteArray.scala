@@ -8,12 +8,11 @@ package gov.census.das.spark.udf
 
 import org.apache.spark.sql.api.java.UDF1
 
-import java.nio.ShortBuffer
-
-class binaryToShortArray extends UDF1[Array[Byte], Array[Short]] {
-  override def call(bytes: Array[Byte]): Array[Short] = {
+class binaryToByteArray extends UDF1[Array[Byte], Array[Byte]] {
+  override def call(bytes: Array[Byte]): Array[Byte] = {
     if (bytes == null) {return null}
     val fb = new fillBuffer
-    ShortBuffer.allocate(bytes.length / 2).put(fb.call(bytes).asShortBuffer).array()
+    fb.call(bytes).array()
   }
 }
+  

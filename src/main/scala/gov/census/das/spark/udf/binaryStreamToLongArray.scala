@@ -6,6 +6,7 @@
 
 package gov.census.das.spark.udf
 import org.apache.spark.sql.api.java.UDF1
+
 import java.nio.LongBuffer
 
 class binaryStreamToLongArray extends UDF1[Array[Byte], Array[Long]] {
