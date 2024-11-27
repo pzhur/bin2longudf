@@ -10,6 +10,13 @@ def test_conversion(spark, udf_reg_name, udf_name, spark_dtype, dtype):
     arrs_from_sp = map(lambda a: np.array(a), df.selectExpr(f"{udf_reg_name}(value) as value").rdd.map(lambda r: r.value).collect())
     assert np.all(np.array(tuple(arrs_from_sp)) == np.array(arrs))
 
+def test_sparsify(spark):
+    spark.udf.registerJavaFunction("filter2NZ", f"gov.census.das.spark.udf.subset2NZSparse", T.ArrayType(T.LongType()))
+    nz = [0,4,6]
+    data = [1,2,3,4,5,6,7]
+    df = sc.parallelize([[nz, data], [nz, data]]).toDF()
+    df.selectExpr("filter2NZ(_1, _2)").show()
+
 
 if __name__ == "__main__":
     spark = SparkSession.builder.getOrCreate()
@@ -26,3 +33,5 @@ if __name__ == "__main__":
     test_conversion(spark, "bin2dajava", "binToDoubleJava", T.DoubleType(), np.float64)
     test_conversion(spark, "bin2fa", "binaryToFloatArray", T.FloatType(), np.float32)
     test_conversion(spark, "bin2fajava", "binToFloatJava", T.FloatType(), np.float32)
+    test_sparsify(spark)
+
