@@ -12,10 +12,14 @@ def test_conversion(spark, udf_reg_name, udf_name, spark_dtype, dtype):
 
 def test_sparsify(spark):
     spark.udf.registerJavaFunction("filter2NZ", f"gov.census.das.spark.udf.subset2NZSparse", T.ArrayType(T.LongType()))
-    nz = [0,4,6]
+    nz = np.array([0,4,6]).astype(np.int32).tolist()
     data = [1,2,3,4,5,6,7]
-    df = sc.parallelize([[nz, data], [nz, data]]).toDF()
-    df.selectExpr("filter2NZ(_1, _2)").show()
+    df = sc.parallelize([[nz, data], [nz, data]])\
+    .toDF(schema=T.StructType(
+        [T.StructField("nz", T.ArrayType(T.IntegerType())),
+         T.StructField("data", T.ArrayType(T.LongType()))
+         ]))
+    df.selectExpr("filter2NZ(nz, data)").show()
 
 
 if __name__ == "__main__":
